@@ -5,12 +5,12 @@ I am hoping the data generated in this run is enough to assemble the genomes of 
 
 Steps 1-2 are all run in a conda environment called read_QC.
 
-**Step One - Super accuracy rebasecalling on HPC**
+**Step 1 - Super accuracy rebasecalling on HPC**
 
 The combined pass, fail and skip reads (in fast5 format) from both the initial run (28.923) and the rerun of the same flowcell (29.9.23) will be combined in one folder and rebasecalled using super accuracy guppy basecaller (version 6.0.1), bash script titled 'super_basecalling_SQK_RBK004.sh'. *Note we could use the new Dorado basecaller here, but for now I am sticking with the guppy basecaller*
 
 
-**Step Two - Read QC on superbasecalled reads**
+**Step 2 - Read QC on superbasecalled reads**
 
 **2.1 -Nanoplot**
 Using Nanoplot to QC the newly basecalled reads. Nanoplot is installed via conda (conda install -c bioconda nanoplot) and generates plots/summary statistics from the sequencing_summary.txt files that are generated for each barcode that reside in the same directory where the new fastq pass/fail etc reads are generated after basecalling. Output is a html file summarising all the QC analysis (Nanplot-report) aswell as all the individual png images from this report. For the 28-29.9.23 run with our 4 Campylobacter isolates from geese and 2 from cattle, the Nanoplot reports tells us that in general, the number of reads generated are typically looking about 6-15k for the geese, though more like 20-30k for the cattle. Read lengths look good (30-60k read lengths) and based on the Campylobacter genome being ~1.6Mb and the number of reads for any given barcode ~ 47,456,052bp, this equates to about 40x coverage of the genome (very nice!).
@@ -22,6 +22,15 @@ SNIKT (Ranjan et al., 2022) is a tool for removing any potential barcode adapate
 
 
 
+**Step 3 - Genome assembly and polishing**
+
+**3.1 Genome assembly with Flye**
+
+Flye (flye.sh) is used to assemble the Nanopore sequenced *Campylobacter* isolates. In the script I have set the parameters --nano-hq, indicating that these are high quality reads (remember we used super accuracy basecalling on the Nanopore reads and have trimmed them of any potential adapter contamination). I have also given a reference genome size for *Campylobacter jejuni* (remember these samples are whole genome Nanopore sequences of *Campylobacter jejuni* (and one *coli*) isolates, isolated from geese and cattle). I set the reference genomes size for *Campylobacter jejuni* as 1.6Mb using the parameter -g 1.6M in the flye.sh script. Note assembly is very quick uaing Flye - only takes a few minutes to assemble each sample. 
+
+**3.2 Assembly polishing using Medaka**
+
+The assembled genomes generated from flye.sh were then polished with one round of Medaka. We could have increased the rounds of polishing here, but apparently the latest medaka releases don't require you to do multiple rounds of polishing, so I have left it at one round. Note that for medaka polishing, you need to set an appropriate medaka model based on the Nanopore the flow cell type, the guppy accuracy used (always super, in my case) and the version of guppy used to basecall the raw reads. It is not always possible to get a medaka model that macthes all of these criteria that the user specifically used, so in these cases the closest accurate medaka model is used.  Note that I had two Nanopore runs for my Campylobacter isolates sequenced. The first run, using the sequencing library kit SQK-RBK004, was initially used to sequence 6 isolates and the remaining isolates (24) were sequenced using the kit SQK-RBK114. You will note that I have two super accuracy guppy basecalling scripts that correspond to the fact that I had used two different sequencing libraries across these isolates - super_basecalling_SQK_RBK004_GPU.sh and super_basecalling_SQK_RBK114_GPU.sh. The medaka model chosen for the genome assemblies sequenced using the SQK-RBK004 kit was r941_sup_plant_g610 (While it says plant, it has the right flow cell, super accuracy and right version of guppy) and the medaka model used for the SQK-RBK114 kit was r1041_e82_400bps_sup_g615 (everything bar the Guppy version is correct - the guppy version 6.1.5 was the highest version they had available, but I used v 6.5.7). 
 
 *References*:
 
