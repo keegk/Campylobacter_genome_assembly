@@ -97,7 +97,7 @@ The final Nanopore genomes and hybrid genomes were uploaded to the ***Campylobac
 
  **Section 2.1 - Downloading a schema to be used with chewBBACA**
 
-We need to use a Campylobacter jejuni/coli cgMLST schema to use as a reference to compare and identify alleles at specific loci in our Nanopore/hybrid assemblies, before we can generate any phylogenetic trees. I have, as of 23.1.25, used the in-built wgMLST chewBBACA schema (https://chewbbaca.online/species/4/schemas/1) for running my allele call script below. However, this may not be the most approriate schema as it is wg rather than cgMLST (may account for why I have many 2loci not identified in my html ouput generated from chewbbaca_allelecall_evaluator.sh script below.
+We need to use a Campylobacter jejuni/coli cgMLST schema to use as a reference to compare and identify alleles at specific loci in our Nanopore/hybrid assemblies, before we can generate any phylogenetic trees. I have, as of 23.1.25, used the in-built wgMLST chewBBACA schema (https://chewbbaca.online/species/4/schemas/1) for running my allele call script below. However, this may not be the most approriate schema as it is wg rather than cgMLST (may account for why I have many loci not identified in my html ouput generated from chewbbaca_allelecall_evaluator.sh script below).
 
 ***Update 23.1.25**
 
