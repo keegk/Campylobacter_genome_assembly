@@ -12,9 +12,17 @@ The combined pass, fail and skip reads (in fast5 format) from both the initial r
 
 **Step Two - Read QC on superbasecalled reads**
 
-Using Nanoplot to QC the newly basecalled reads. Nanoplot is installed via conda (conda install -c bioconda nanoplot) and generates plots/summary statistics from the sequencing_summary.txt files that are generated for each barcode that reside in the same directory where the new fastq pass/fail etc reads are generated after basecalling. 
+**2.1 -Nanoplot**
+Using Nanoplot to QC the newly basecalled reads. Nanoplot is installed via conda (conda install -c bioconda nanoplot) and generates plots/summary statistics from the sequencing_summary.txt files that are generated for each barcode that reside in the same directory where the new fastq pass/fail etc reads are generated after basecalling. Output is a html file summarising all the QC analysis (Nanplot-report) aswell as all the individual png images from this report. For the 28-29.9.23 run with our 4 Campylobacter isolates from geese and 2 from cattle, the Nanoplot reports tells us that in general, the number of reads generated are typically looking about 6-15k for the geese, though more like 20-30k for the cattle. Read lengths look good (30-60k read lengths) and based on the Campylobacter genome being ~1.6Mb and the number of reads for any given barcode ~ 47,456,052bp, this equates to about 40x coverage of the genome (very nice!).
 
-In an interactive job on the hpcc, activate the read_QC environment, cd to a barcode directory and then run: NanoPlot -t 4 --summary sequencing_summary.txt  -o Nanoplot_barcode1_summary (t = threads/cores). This will generate a html output summarising all the QC analysis (Nanplot-report) aswell as all the individual png images from this report. For the 28-29.9.23 run with our 4 Campylobacter isolates from geese and 2 from cattle, the Nanoplot reports tells us that in general, the number of reads generated are typically looking about 6-15k for the geese, though more like 20-30k for the cattle. Read lengths look good (30-60k read lengths) and based on the Campylobacter genome being ~1.6Mb and the number of reads for any given barcode ~ 47,456,052bp, this equates to about 40x coverage of the genome (very nice!).
+**2.2 Removing potential adapter contamination/noisy reads per sample using SNIKT**
 
-**Step three - Removing poor quality reads with FitLong**
+SNIKT (Ranjan et al., 2022) is a tool for removing any potential barcode adapaters that may still be attached to reads after sequencing (despite adding the flag --remove adapters during guppy basecalling) and it can also filter out reads of a certain length. It is given no a priori information about the reads per sample and, by aligning reads from the 5' to 3'end, outputs a visual representation of areas where the nucleotide composition differs from the expected composition, indicating the presence of adapter contamination. The script to generate this initial 5' to 3' alignment per sample is called snikt_contamination_check.sh. For each sample I visually assessed potential sources of adapter contamination and in a follow up script (snikt_trim.sh) I manually set the amount of trim at both the 3' and 5' end for each sample to try and remove any excess noise from the reads, either from adapter contamination or poorly called nucleotides, to help with downstream genome assembly. 
 
+
+
+
+
+*References*:
+
+Ranjan, P., Brown, C.A., Erb-Downward, J.R. and Dickson, R.P., 2022. SNIKT: sequence-independent adapter identification and removal in long-read shotgun sequencing data. Bioinformatics, 38(15), pp.3830-3832.
