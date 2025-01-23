@@ -10,7 +10,7 @@ Run 2:
 The data (assembled whole genomes of C jejuni/C.coli) generated here will be applied to attempt to answer the following questions:
 
 1) Characterise in more depth (sequence type) the *Campylobacter jejuni/coli* found in both geese and cattle
-2) Identitfy if the same sequence type of *Campylobacter jejuni/coli* is found in both the geese and cattle
+2) cgMLST evalution and generation of phylogenetic tree to compare relatedness of C.jejuni strains isolated from cattle and geese
 3) Scan the assembled genomes for AMR and virulence genes
 
 
@@ -78,19 +78,28 @@ The final step in creating the hybrid assemblies, is to finally polish the Nanop
 Using the quast.sh script again to assess the quality of the hybrid assemblies now against the reference *C.jejuni* strain NCTC 11168.
 
 
-################### DATA ANALYSIS ##############################
 
-In this section, we will now look at the scripts used to  analyse the Nanopore assemblies (N = 30) and hyrbid assemblies (N = 24) to answer the following questions:
+**DATA ANALYSIS**
 
-
-*Identitfy if the same sequence type of *Campylobacter jejuni/coli* is found in both the geese and cattle*
+In this section, we will now look at the scripts/analysis used to  analyse the Nanopore assemblies (N = 30) and hybrid assemblies (N = 24) to answer the following questions:
 
 
+**Section 1**  
+
+***Aim: Assign sequence types of *Campylobacter jejuni/coli* to the Nanopore/hybrid assemblies found in both geese and cattle***
+
+The final Nanopore genomes and hybrid genomes were uploaded to the ***Campylobacter jejuni/coli*** PubMLST (https://pubmlst.org/bigsdb?db=pubmlst_campylobacter_seqdef&page=sequenceQuery) and screened against the PubMLST Campylobacter schemas to assign sequence types (ST) to the genomes. First of all, some definitions: MLST stands for multi-locus sequence typing and PubMLST is simply a public repository of MLST schemes, including Campylobacter jejuni/coli. MLST schemes help us to characterise Campylobacter isolates (a single colony of Campylobacter that has been isolated from Campylobacter cultured in th lab), by looking at areas where loci in the genome are the same, or different between, these isolates. Essentially by using several of these loci, we can generate a genomic "fingerprint" to each isolate and from that determine how closely or distantly related isolates are to each other. There are two "schemes" for C.jejuni/coli in PubMLST, the standard MLST (Dingle et al., 2001), comprising of 7 housekeeping genes (7 loci) established using 194 C. jejuni isolates of diverse origins and the cgMLST (v1) which contain 1,343 loci derived from the reference strain NCTC 11168 (Cody et al., 2017). There is also a cgMLST (v2) on PubMLST (https://pubmlst.org/bigsdb?db=pubmlst_campylobacter_seqdef&page=schemeInfo&scheme_id=8) that contains 1142 loci, although I've not been able to get much info on whether this scheme is also based on loci found in the reference strain NCTC 11168 - I assume it is and just has slightly less loci than the original scheme (maybe to increase the likelihood that loci will be detected in query assemblies/sequences - perhaps some of these missing loci are not found consistently in many Campylobacter strains).
+
+
+2)cgMLST evalution and generation of phylogenetic tree to compare relatedness of C.jejuni strains isolated from cattle and geese*
+
+**Section 2 -chewBBACA to examine core genome MLST (cgMLST) of C.jejuni Nanopore and hybrid assemblies**
 
 
 
 
 
 *References*:
-
+Cody, A.J., Bray, J.E., Jolley, K.A., McCarthy, N.D. and Maiden, M.C., 2017. Core genome multilocus sequence typing scheme for stable, comparative analyses of Campylobacter jejuni and C. coli human disease isolates. Journal of clinical microbiology, 55(7), pp.2086-2097.
+Dingle, K.E., Colles, F.M., Wareing, D.R.A., Ure, R., Fox, A.J., Bolton, F.E., Bootsma, H.J., Willems, R.J.L., Urwin, R. and Maiden, M.C.J., 2001. Multilocus sequence typing system for Campylobacter jejuni. Journal of clinical microbiology, 39(1), pp.14-23.
 Ranjan, P., Brown, C.A., Erb-Downward, J.R. and Dickson, R.P., 2022. SNIKT: sequence-independent adapter identification and removal in long-read shotgun sequencing data. Bioinformatics, 38(15), pp.3830-3832.
