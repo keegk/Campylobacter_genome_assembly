@@ -32,6 +32,14 @@ Flye (flye.sh) is used to assemble the Nanopore sequenced *Campylobacter* isolat
 
 The assembled genomes generated from flye.sh were then polished with one round of Medaka. We could have increased the rounds of polishing here, but apparently the latest medaka releases don't require you to do multiple rounds of polishing, so I have left it at one round. Note that for medaka polishing, you need to set an appropriate medaka model based on the Nanopore the flow cell type, the guppy accuracy used (always super, in my case) and the version of guppy used to basecall the raw reads. It is not always possible to get a medaka model that macthes all of these criteria that the user specifically used, so in these cases the closest accurate medaka model is used.  Note that I had two Nanopore runs for my Campylobacter isolates sequenced. The first run, using the sequencing library kit SQK-RBK004, was initially used to sequence 6 isolates and the remaining isolates (24) were sequenced using the kit SQK-RBK114. You will note that I have two super accuracy guppy basecalling scripts that correspond to the fact that I had used two different sequencing libraries across these isolates - super_basecalling_SQK_RBK004_GPU.sh and super_basecalling_SQK_RBK114_GPU.sh. The medaka model chosen for the genome assemblies sequenced using the SQK-RBK004 kit was r941_sup_plant_g610 (While it says plant, it has the right flow cell, super accuracy and right version of guppy) and the medaka model used for the SQK-RBK114 kit was r1041_e82_400bps_sup_g615 (everything bar the Guppy version is correct - the guppy version 6.1.5 was the highest version they had available, but I used v 6.5.7). 
 
+**Step 4 - assessing quality of newly polished genomes**
+
+**4.1 - Aligning newly polished genomes to a reference C.jejuni genome using Mummer4**
+
+Here, we want to align my polished assemblies against a reference genome, to get an indication of how similar my polished assemblies are to what we would expect. First we use the script nucmer.sh to align each of my assemblies against the reference geome and then we use the scrip mummerplot.sh to generate a .png image of the alignment, showing the reference genome on the x axis and our assembly on the y axis. We would expect to find a diaganol line on the plot, which indicates that the nucleotides are aligning well across out entire assembly to the reference genome. The reference genome for C.jejuni used was strain NCTC 11168 (GCF_000009085.1_ASM908v1_genomic.fna) which is recommended as the reference genome for C.jejuni analysis on NCBI (https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000009085.1/).
+
+
+
 *References*:
 
 Ranjan, P., Brown, C.A., Erb-Downward, J.R. and Dickson, R.P., 2022. SNIKT: sequence-independent adapter identification and removal in long-read shotgun sequencing data. Bioinformatics, 38(15), pp.3830-3832.
