@@ -1,9 +1,19 @@
 # Campylobacter_genome_assembly
-This is a repository describing the genome assembly of *Campylobacter* isolates from greylag geese and cattle. As of January 2024, this repository contains only the isolates in the water_campy_28_9_23 (and the rerun of this same MinION flow cell on 29_9_23). This run had 4 Campylobacter isolates from four geese - FB1, FB2, FF1,FF2. It also had 2 *Camylobacter*  isolates from 2 cattle samples - FCD2,FCD3. Afurther 6 water samples were sequenced (unrelated to PhD) so that the total 12 barcodes from the kit were used. The isolates were run using the rapid kit SQKRBK004 using a FLOMIN106D flowcell. Initial run lasted only 6hrs - error 'script failed' on our sequencing computer. This was the first run we have done since ONT updated the basecaller from guppy to dorado - th last MinKNOW update completed by IT on our sequencing computer was August 2023. The flowcell stopped at 7pm on 28.9.23 - it had at this stage 8.74 Gb of data produced (pass/fail reads), 201.15k reads generated and an estimated N50 of 13.27kb. The flowcell was briefly removed from the device the morning of the 29.9.23 and the run restarted (no additonal sequencing buffer added to the MinION). The run lasted another 21 hours, 27 minutes and generated 11.35Gb of data, 195.71k reads with an N50 of 16.5Kb.
+This is a repository describing the genome assembly of *Campylobacter* isolates from greylag geese and cattle. This repository contains the scripts for read quality checks, genome assembly, genome assembly checks, hybrid assembly, AMR and phylogenetic analysis. Two Nanopore runs were conducted that generated the data for this thesis chapter. 
 
-I am hoping the data generated in this run is enough to assemble the genomes of these *Campylobacter* isolates to 1) Characterise in more depth (species/strain) the *Campylobacter* found in both geese and cattle 2) Identitfy if the same strain or similar strain of *Campylobacter* is found in both the geese and cattle 3) Potentially look for areas of interest relating to AMR - 
+Run 1: The first run, using the rapid sequencing kit SQK-RBK004 and a FLOMIN106D flowcell, had 4 *Campylobacter* isolates from four geese - FB1, FB2, FF1,FF2. It also had 2 *Camylobacter*  isolates from 2 cattle samples - FCD2,FCD3. Initial run lasted only 6hrs - error 'script failed' on our sequencing computer. This was the first run we have done since ONT updated the basecaller from guppy to dorado - th last MinKNOW update completed by IT on our sequencing computer was August 2023. The flowcell stopped at 7pm on 28.9.23 - it had at this stage 8.74 Gb of data produced (pass/fail reads), 201.15k reads generated and an estimated N50 of 13.27kb. The flowcell was briefly removed from the device the morning of the 29.9.23 and the run restarted (no additonal sequencing buffer added to the MinION). The run lasted another 21 hours, 27 minutes and generated 11.35Gb of data, 195.71k reads with an N50 of 16.5Kb.
 
-Steps 1-2 are all run in a conda environment called read_QC.
+Run 2: 
+
+**Aims of chapter**
+
+The data (assembled whole genomes of C jejuni/C.coli) generated here will be applied to attempt to answer the following questions:
+
+1) Characterise in more depth (sequence type) the *Campylobacter jejuni/coli* found in both geese and cattle
+2) Identitfy if the same sequence type of *Campylobacter jejuni/coli* is found in both the geese and cattle
+3) Scan the assembled genomes for AMR and virulence genes
+
+
 
 **Step 1 - Super accuracy rebasecalling on HPC**
 
@@ -37,6 +47,35 @@ The assembled genomes generated from flye.sh were then polished with one round o
 **4.1 - Aligning newly polished genomes to a reference C.jejuni genome using Mummer4**
 
 Here, we want to align my polished assemblies against a reference genome, to get an indication of how similar my polished assemblies are to what we would expect. First we use the script nucmer.sh to align each of my assemblies against the reference geome and then we use the scrip mummerplot.sh to generate a .png image of the alignment, showing the reference genome on the x axis and our assembly on the y axis. We would expect to find a diaganol line on the plot, which indicates that the nucleotides are aligning well across out entire assembly to the reference genome. The reference genome for C.jejuni used was strain NCTC 11168 (GCF_000009085.1_ASM908v1_genomic.fna) which is recommended as the reference genome for C.jejuni analysis on NCBI (https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000009085.1/).
+
+**4.2 - Assessing QC metrics of polished assemblies against a reference genome**
+
+QUAST is also looking at the quality of an alignment to a reference genome, but outputs a report stating quality metrics (% genome covered, N50,L50 etc), as opposed to mummer4 which in our use case is generating the alignment plot only between our polished assemblies and a reference genome. Note here that we use the same reference C. jejuni genome (strain NCTC 11168) as we did in mummer4 in the quast.sh script using the -R parameter. 
+
+
+
+***Step 5 - Hybrid assemblies***
+
+For the majority of our *C.jejuni* isolates sequenced (N = 30 with one replicate isolate, FF1) we also have corresponding Illumina forward and reverse sequencing reads and here we are going to use thes reads to polish our existing genome assemblies, in the hope that we may get even better results when we try to assign sequence types for each of our isolates and when we generate a phylogenetic tree to indicate how similar strains are to each other (for example, do we find that strains associated with geese are the same or dissimilar to those found in cattle?). 
+
+
+**5.1 - polishing existing Nanopore genomes with illumina short reads using polypolish**
+
+**5.1.1 - Align illumina reads to Nanopore genomes with minimap2**
+
+Using the script polypolish_align_reads.sh, here we use minimap2 to align the illumina paired-end fastq.gz reads to our Nanopore assemblies and outputting two sam files which correspond to 1) alignment of the forward illumina reads to the Nanopore genome and 2) alignment of the reverse illumina reads to the Nanopore genome. Note that in the polypolish documentation (https://github.com/rrwick/Polypolish/wiki/How-to-run-Polypolish), they use BWA to align the illumina reads to the Nanopore assembly. BWA has now been replced with minimap2 for PACBIO and Nanopore alignment (https://github.com/lh3/bwa), hence why we use this instead.  Note the flags used in this polypolish_align_reads.sh script ; The flag option -x, which sets multiple parameters at the same time, the -a option, which I believe corresponds to the -a flag in BWA (The -a option is key! This makes BWA align each read to all possible locations, not just the best location. Polypolish needs this to polish repeat sequences, source:(https://github.com/rrwick/Polypolish/wiki/How-to-run-Polypolish)  and the -sr option, indicating that these are short reads to be aligned. 
+
+**5.1.2 - Filtering these .sam alignments using polypolish**
+
+Using the script polypolish_filter.sh, we use the tool polypolish to filter these newly created .sam alignments between the illumina paired-end reads and the Nanopore assemblies. This is an optional, but recommended step with polypolish. 
+
+**5.1.3 - Polishing the Nanopore assemblies with the .sam alignments generated from the illumina paired-end reads**
+
+The final step in creating the hybrid assemblies, is to finally polish the Nanopore assemblies with the newly created .sam alignments generated from the paired-end illumina reads. Note I use the flag --careful which will make Polypolish discard reads that align to more than one place in the Nanopore assembly. This does limit the ability of Polypolish to polish over repeat regions and is recommended to be used if the sequencing depth (coverage?) is less than 25x. **NB -I've set this flag for all my hybrid assemblies, but I wonder if it might be worth going back and only using it on some of my assemblies with this low coverage**
+
+
+
+
 
 
 
