@@ -73,6 +73,18 @@ Using the script polypolish_filter.sh, we use the tool polypolish to filter thes
 
 The final step in creating the hybrid assemblies, is to finally polish the Nanopore assemblies with the newly created .sam alignments generated from the paired-end illumina reads. Note I use the flag --careful which will make Polypolish discard reads that align to more than one place in the Nanopore assembly. This does limit the ability of Polypolish to polish over repeat regions and is recommended to be used if the sequencing depth (coverage?) is less than 25x. **NB -I've set this flag for all my hybrid assemblies, but I wonder if it might be worth going back and only using it on some of my assemblies with this low coverage**
 
+**5.2 - QUAST to assessing quality of hybrid assemblies**
+
+Using the quast.sh script again to assess the quality of the hybrid assemblies now against the reference *C.jejuni* strain NCTC 11168.
+
+
+################### DATA ANALYSIS ##############################
+
+In this section, we will now look at the scripts used to  analyse the Nanopore assemblies (N = 30) and hyrbid assemblies (N = 24) to answer the following questions:
+
+
+*Identitfy if the same sequence type of *Campylobacter jejuni/coli* is found in both the geese and cattle*
+
 
 
 
