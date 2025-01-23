@@ -95,7 +95,19 @@ The final Nanopore genomes and hybrid genomes were uploaded to the ***Campylobac
 
 ***Aim: evaluate cgMLST and generation of phylogenetic tree to compare relatedness of C.jejuni strains isolated from cattle and geese***
 
+ **Section 2.1 - Downloading a schema to be used with chewBBACA**
 
+We need to use a Campylobacter jejuni/coli cgMLST schema to use as a reference to compare and identify alleles at specific loci in our Nanopore/hybrid assemblies, before we can generate any phylogenetic trees. I have, as of 23.1.25, used the in-built wgMLST chewBBACA schema (https://chewbbaca.online/species/4/schemas/1) for running my allele call script below. However, this may not be the most approriate schema as it is wg rather than cgMLST (may account for why I have many 2loci not identified in my html ouput generated from chewbbaca_allelecall_evaluator.sh script below.
+ 
+ **Section 2.2 - chewBBACA Allele call**
+
+The script chewbbaca_allelecall.sh takes as input all the Nanopore assemblies or hybrid assemblies and runs Prodigal (gene prediction tool) to search these inputted genomes for coding DNA sequences (CDS) - i.e areas of the genomes that code for proteins. Once it has detected these CDS, it looks for exact matches between the nucleotides in these CDS against loci in the schema supplied. If an exact match between the nucleotides in the CDS and nucleotides at loci in the schema are not found, then the unidentified CDS loci are translated and filtered, excluding CDS that have ambiguous bases or are below a certain length threshold. Those proteins from the translated CDS that remain after filtering are searched against proteins (translated alleles) at each locus in the schema and exact matches at the protein level are retained. These distinct proteins are then ordered based on size and **clustered based on the percentage of shared distinct minimizers** with the schema representative alleles. 
+
+As of 23 Jan 2025, I have supplied the flag -g with the schema 
+
+ **Section 2.3 - chewBBACA Allele call evaluator**
+
+chewbbaca_allelecall_evaluator.sh takes the results of chewbbaca_allelecall.sh and ouputs them into several reports, including a html ouput that includes a neighbour joining phylogenetic tree. 
 
 *References*:
 Cody, A.J., Bray, J.E., Jolley, K.A., McCarthy, N.D. and Maiden, M.C., 2017. Core genome multilocus sequence typing scheme for stable, comparative analyses of Campylobacter jejuni and C. coli human disease isolates. Journal of clinical microbiology, 55(7), pp.2086-2097.
