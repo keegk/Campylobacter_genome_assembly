@@ -42,34 +42,34 @@ Flye (flye.sh) is used to assemble the Nanopore sequenced *Campylobacter* isolat
 
 The assembled genomes generated from flye.sh were then polished with one round of Medaka. We could have increased the rounds of polishing here, but apparently the latest medaka releases don't require you to do multiple rounds of polishing, so I have left it at one round. Note that for medaka polishing, you need to set an appropriate medaka model based on the Nanopore the flow cell type, the guppy accuracy used (always super, in my case) and the version of guppy used to basecall the raw reads. It is not always possible to get a medaka model that macthes all of these criteria that the user specifically used, so in these cases the closest accurate medaka model is used.  Note that I had two Nanopore runs for my Campylobacter isolates sequenced. The first run, using the sequencing library kit SQK-RBK004, was initially used to sequence 6 isolates and the remaining isolates (24) were sequenced using the kit SQK-RBK114. You will note that I have two super accuracy guppy basecalling scripts that correspond to the fact that I had used two different sequencing libraries across these isolates - super_basecalling_SQK_RBK004_GPU.sh and super_basecalling_SQK_RBK114_GPU.sh. The medaka model chosen for the genome assemblies sequenced using the SQK-RBK004 kit was r941_sup_plant_g610 (While it says plant, it has the right flow cell, super accuracy and right version of guppy) and the medaka model used for the SQK-RBK114 kit was r1041_e82_400bps_sup_g615 (everything bar the Guppy version is correct - the guppy version 6.1.5 was the highest version they had available, but I used v 6.5.7). 
 
-**Step 4 - assessing quality of newly polished genomes**
+**Step 4 - Assessing quality of newly polished genomes**
 
 **4.1 - Aligning newly polished genomes to a reference C.jejuni genome using Mummer4**
 
 Here, we want to align my polished assemblies against a reference genome, to get an indication of how similar my polished assemblies are to what we would expect. First we use the script nucmer.sh to align each of my assemblies against the reference geome and then we use the scrip mummerplot.sh to generate a .png image of the alignment, showing the reference genome on the x axis and our assembly on the y axis. We would expect to find a diaganol line on the plot, which indicates that the nucleotides are aligning well across out entire assembly to the reference genome. The reference genome for C.jejuni used was strain NCTC 11168 (GCF_000009085.1_ASM908v1_genomic.fna) which is recommended as the reference genome for C.jejuni analysis on NCBI (https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000009085.1/).
 
-**4.2 - Assessing QC metrics of polished assemblies against a reference genome**
+**4.2 - QUAST to assess QC metrics of polished assemblies against a reference genome**
 
 QUAST is also looking at the quality of an alignment to a reference genome, but outputs a report stating quality metrics (% genome covered, N50,L50 etc), as opposed to mummer4 which in our use case is generating the alignment plot only between our polished assemblies and a reference genome. Note here that we use the same reference C. jejuni genome (strain NCTC 11168) as we did in mummer4 in the quast.sh script using the -R parameter. 
 
 
 
-***Step 5 - Hybrid assemblies***
+**Step 5 - Hybrid assemblies**
 
 For the majority of our *C.jejuni* isolates sequenced (N = 30 with one replicate isolate, FF1) we also have corresponding Illumina forward and reverse sequencing reads and here we are going to use thes reads to polish our existing genome assemblies, in the hope that we may get even better results when we try to assign sequence types for each of our isolates and when we generate a phylogenetic tree to indicate how similar strains are to each other (for example, do we find that strains associated with geese are the same or dissimilar to those found in cattle?). 
 
 
-**5.1 - polishing existing Nanopore genomes with illumina short reads using polypolish**
+**5.1 - Polishing existing Nanopore genomes with illumina short reads using polypolish**
 
-**5.1.1 - Align illumina reads to Nanopore genomes with minimap2**
+***5.1.1 - Align illumina reads to Nanopore genomes with minimap2***
 
 Using the script polypolish_align_reads.sh, here we use minimap2 to align the illumina paired-end fastq.gz reads to our Nanopore assemblies and outputting two sam files which correspond to 1) alignment of the forward illumina reads to the Nanopore genome and 2) alignment of the reverse illumina reads to the Nanopore genome. Note that in the polypolish documentation (https://github.com/rrwick/Polypolish/wiki/How-to-run-Polypolish), they use BWA to align the illumina reads to the Nanopore assembly. BWA has now been replced with minimap2 for PACBIO and Nanopore alignment (https://github.com/lh3/bwa), hence why we use this instead.  Note the flags used in this polypolish_align_reads.sh script ; The flag option -x, which sets multiple parameters at the same time, the -a option, which I believe corresponds to the -a flag in BWA (The -a option is key! This makes BWA align each read to all possible locations, not just the best location. Polypolish needs this to polish repeat sequences, source:(https://github.com/rrwick/Polypolish/wiki/How-to-run-Polypolish)  and the -sr option, indicating that these are short reads to be aligned. 
 
-**5.1.2 - Filtering these .sam alignments using polypolish**
+***5.1.2 - Filtering these .sam alignments using polypolish***
 
 Using the script polypolish_filter.sh, we use the tool polypolish to filter these newly created .sam alignments between the illumina paired-end reads and the Nanopore assemblies. This is an optional, but recommended step with polypolish. 
 
-**5.1.3 - Polishing the Nanopore assemblies with the .sam alignments generated from the illumina paired-end reads**
+***5.1.3 - Polishing the Nanopore assemblies with the .sam alignments generated from the illumina paired-end reads***
 
 The final step in creating the hybrid assemblies, is to finally polish the Nanopore assemblies with the newly created .sam alignments generated from the paired-end illumina reads. Note I use the flag --careful which will make Polypolish discard reads that align to more than one place in the Nanopore assembly. This does limit the ability of Polypolish to polish over repeat regions and is recommended to be used if the sequencing depth (coverage?) is less than 25x. **NB -I've set this flag for all my hybrid assemblies, but I wonder if it might be worth going back and only using it on some of my assemblies with this low coverage**
 
